@@ -1,6 +1,6 @@
 {
   "term_code": "202630",
-  "ntfy_topic": "carleton-seats-833382a9",
+  "ntfy_topic": "SET_VIA_NTFY_TOPIC_SECRET",
   "poll_seconds": 600,
   "notify_on_waitlist": true,
   "notify_current_open": false,
@@ -30,7 +30,7 @@
   "_help": {
     "term_code": "202620=Summer 2026, 202630=Fall 2026, 202710=Winter 2027",
     "watch": "List of courses to watch. Each entry: {subject, and either course_number OR course_prefix}. Optional sections:[{crn}] / [{section}] narrows to specific sections; omit to watch all sections of that course.",
-    "ntfy_topic": "Subscribe to this exact topic in the ntfy phone app. Keep it private.",
+    "ntfy_topic": "The real topic is kept out of this public repo. In the cloud it comes from the NTFY_TOPIC GitHub Actions secret (which overrides this placeholder). To run locally, set an NTFY_TOPIC env var or temporarily put your topic here.",
     "poll_seconds": "Seconds between checks. 600 = every 10 minutes (only used when running locally/continuously).",
     "notify_on_waitlist": "true = also alert when a waitlist opens up, not just open seats.",
     "notify_current_open": "false = on startup learn current state quietly and only ping when something newly opens."

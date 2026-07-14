@@ -20,12 +20,11 @@ It reads the same public page you can browse yourself:
 
 2. **Get the phone app** (this is how you're notified):
    - Install **ntfy** from the App Store / Google Play.
-   - Tap **+ Subscribe to topic** and enter your topic name **exactly** as it
-     appears in `config.json` → `ntfy_topic` (currently
-     `carleton-seats-833382a9`).
+   - Tap **+ Subscribe to topic** and enter a topic name of your choosing
+     (something hard to guess, e.g. `carleton-seats-<random>`).
    - That's it — anything the script sends to that topic pops up on your phone.
-   - The topic name is your only "password", so keep it private. Change it in
-     `config.json` to anything hard to guess if you like.
+   - The topic name is your only "password", so keep it private. It is **not**
+     committed to this repo — see "Keep the topic private" below.
 
 3. **Point it at your course(s)** — edit `config.json`. It currently watches
    **all 4th-year COMP courses in Fall 2026**:
@@ -35,7 +34,7 @@ It reads the same public page you can browse yourself:
      "subject": "COMP",
      "course_prefix": "4",         // "4" = every COMP 4xxx (4th year)
      "sections": [],               // [] = all sections
-     "ntfy_topic": "carleton-seats-833382a9",
+     "ntfy_topic": "SET_VIA_NTFY_TOPIC_SECRET",
      "poll_seconds": 300,
      "notify_on_waitlist": true,
      "notify_current_open": false
@@ -119,10 +118,12 @@ when a section *changes* to open — not every run.
 
 ### Two things to know
 
-- **Keep the topic private:** if you ever make the repo *public*, move your
-  topic out of `config.json`. Go to repo **Settings → Secrets and variables →
-  Actions → New repository secret**, name it `NTFY_TOPIC`, paste your topic —
-  the workflow already reads it and it overrides the file.
+- **Keep the topic private:** this repo is public, so the real ntfy topic is
+  **not** stored here. It lives in a GitHub Actions secret named `NTFY_TOPIC`
+  (repo **Settings → Secrets and variables → Actions**), which the workflow
+  reads and uses in place of the `SET_VIA_NTFY_TOPIC_SECRET` placeholder in
+  `config.json`. To run locally, set an `NTFY_TOPIC` environment variable to
+  your topic.
 - **GitHub disables schedules after 60 days of no repo activity.** If you're
   watching across a long stretch, push any small commit now and then to keep it
   alive. Scheduled runs can also be delayed a few minutes when GitHub is busy.
