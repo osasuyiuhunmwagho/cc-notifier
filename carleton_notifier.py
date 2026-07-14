@@ -199,27 +199,46 @@ def gather_sections(term, subject, number="", prefix=""):
     ]
 
 
+def resolve_watch(cfg):
+    """Return the list of course-watch entries. Supports both the multi-course
+    "watch": [...] format and the older single-course top-level fields."""
+    if cfg.get("watch"):
+        return cfg["watch"]
+    return [
+        {
+            "subject": cfg.get("subject", ""),
+            "course_number": cfg.get("course_number", ""),
+            "course_prefix": cfg.get("course_prefix", ""),
+            "sections": cfg.get("sections", []),
+        }
+    ]
+
+
 def check_once(cfg, state, notify=True):
     term = cfg["term_code"]
-    subject = cfg["subject"].upper()
-    number = str(cfg.get("course_number", ""))
-    prefix = str(cfg.get("course_prefix", ""))
-    targets = cfg.get("sections", [])  # list of {"crn": ...} or {"section": ...}
     include_waitlist = cfg.get("notify_on_waitlist", True)
     # On the very first check we record the current state silently, so you only
     # get pinged when a section *changes* to open from now on. Set
     # notify_current_open=true to also be told about seats already open at start.
     notify_current = cfg.get("notify_current_open", False)
 
-    sections = gather_sections(term, subject, number, prefix)
-    watched = [s for s in sections if matches_target(s, targets)]
+    # Gather the watched sections across every course in the config.
+    watched = []
+    for entry in resolve_watch(cfg):
+        subject = entry["subject"].upper()
+        number = str(entry.get("course_number", ""))
+        prefix = str(entry.get("course_prefix", ""))
+        targets = entry.get("sections", [])  # list of {"crn":...} or {"section":...}
+        sections = gather_sections(term, subject, number, prefix)
+        hits = [s for s in sections if matches_target(s, targets)]
+        if not hits:
+            log(
+                f"WARNING: no sections matched {subject} {number} "
+                f"(targets={targets}). Check subject/number/CRN/term in config.json."
+            )
+        watched.extend(hits)
 
     if not watched:
-        log(
-            f"WARNING: no sections matched {subject} {number} "
-            f"(targets={targets}). Found {len(sections)} rows total. "
-            "Check subject/number/CRN/term in config.json."
-        )
         return
 
     for s in sorted(watched, key=lambda x: (x["course"], x["section"])):
@@ -258,9 +277,11 @@ def load_config(path):
     # so it doesn't have to be committed to a public repo.
     if os.environ.get("NTFY_TOPIC"):
         cfg["ntfy_topic"] = os.environ["NTFY_TOPIC"]
-    for req in ("term_code", "subject", "ntfy_topic"):
+    for req in ("term_code", "ntfy_topic"):
         if not cfg.get(req):
             sys.exit(f"config.json is missing required field: {req}")
+    if not cfg.get("watch") and not cfg.get("subject"):
+        sys.exit('config.json needs either a "watch" list or a "subject" field.')
     return cfg
 
 
@@ -294,11 +315,14 @@ def main():
     interval = int(cfg.get("poll_seconds", 180))
     state = load_state(args.state_file)
 
-    label = f"{cfg['subject'].upper()} {cfg.get('course_number','')}".strip()
-    log(f"Watching {label} (term {cfg['term_code']}) every {interval}s.")
+    labels = []
+    for e in resolve_watch(cfg):
+        scope = e.get("course_prefix") and f"{e['course_prefix']}xxx" or e.get(
+            "course_number", ""
+        )
+        labels.append(f"{e['subject'].upper()} {scope}".strip())
+    log(f"Watching {', '.join(labels)} (term {cfg['term_code']}) every {interval}s.")
     log(f"Notifications -> ntfy.sh topic '{cfg['ntfy_topic']}'")
-    if cfg.get("sections"):
-        log(f"Target sections: {cfg['sections']}")
 
     if args.once:
         check_once(cfg, state)

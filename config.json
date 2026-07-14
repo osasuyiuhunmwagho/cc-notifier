@@ -1,34 +1,38 @@
 {
   "term_code": "202630",
-  "subject": "COMP",
-  "course_prefix": "4",
-  "sections": [
-    {"crn": "31155"},
-    {"crn": "31158"},
-    {"crn": "31159"},
-    {"crn": "31161"},
-    {"crn": "31164"},
-    {"crn": "31165"},
-    {"crn": "31166"},
-    {"crn": "31167"},
-    {"crn": "31168"},
-    {"crn": "31169"},
-    {"crn": "31170"}
-  ],
   "ntfy_topic": "carleton-seats-833382a9",
   "poll_seconds": 600,
   "notify_on_waitlist": true,
   "notify_current_open": false,
 
+  "watch": [
+    {
+      "subject": "COMP",
+      "course_prefix": "4",
+      "sections": [
+        {"crn": "31155"},
+        {"crn": "31158"},
+        {"crn": "31159"},
+        {"crn": "31161"},
+        {"crn": "31164"},
+        {"crn": "31165"},
+        {"crn": "31166"},
+        {"crn": "31167"},
+        {"crn": "31168"},
+        {"crn": "31169"},
+        {"crn": "31170"}
+      ]
+    },
+    {"subject": "PHIL", "course_number": "2003"},
+    {"subject": "HIST", "course_number": "1301"}
+  ],
+
   "_help": {
     "term_code": "202620=Summer 2026, 202630=Fall 2026, 202710=Winter 2027",
-    "subject": "Subject code, e.g. COMP",
-    "course_prefix": "Watch a whole level: '4' = all COMP 4xxx (4th year). Use course_number instead for one exact course.",
-    "course_number": "(alternative to course_prefix) exact number, e.g. 4102 for just COMP 4102",
-    "sections": "[] = every matching section. Narrow with CRNs: [{\"crn\":\"31155\"}] or sections: [{\"section\":\"A\"}].",
+    "watch": "List of courses to watch. Each entry: {subject, and either course_number OR course_prefix}. Optional sections:[{crn}] / [{section}] narrows to specific sections; omit to watch all sections of that course.",
     "ntfy_topic": "Subscribe to this exact topic in the ntfy phone app. Keep it private.",
-    "poll_seconds": "Seconds between checks. 600 = every 10 minutes (polite; only used when running locally/continuously).",
+    "poll_seconds": "Seconds between checks. 600 = every 10 minutes (only used when running locally/continuously).",
     "notify_on_waitlist": "true = also alert when a waitlist opens up, not just open seats.",
-    "notify_current_open": "false = on startup, learn current state quietly and only ping you when something newly opens. true = also ping for seats already open at startup."
+    "notify_current_open": "false = on startup learn current state quietly and only ping when something newly opens."
   }
 }
