@@ -1,0 +1,54 @@
+name: Carleton seat notifier
+
+# Runs in GitHub's cloud on a schedule, so it works even when your laptop is off.
+on:
+  schedule:
+    # Every 10 minutes. Note: GitHub queues scheduled jobs and may delay them a
+    # few minutes when it's busy, and disables schedules after 60 days with no
+    # repo activity — push any commit occasionally to keep it alive.
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}   # lets you run it manually from the Actions tab
+
+permissions:
+  contents: read
+
+# Don't let overlapping runs clobber each other's state.
+concurrency:
+  group: carleton-notifier
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      # Restore the open/full state saved by the previous run so we only alert
+      # on changes (a full -> open transition), not every single run.
+      - name: Restore state
+        uses: actions/cache/restore@v4
+        with:
+          path: state.json
+          key: notifier-state-${{ github.run_id }}
+          restore-keys: |
+            notifier-state-
+
+      - name: Check for open seats
+        env:
+          # Optional: set an Actions secret named NTFY_TOPIC to keep your topic
+          # out of the committed config. Falls back to config.json if unset.
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python carleton_notifier.py --once --state-file state.json
+
+      - name: Save state for next run
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state.json
+          key: notifier-state-${{ github.run_id }}
